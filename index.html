@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es" data-neutral="slate">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tablero de Ajedrez</title>
+  <meta name="description" content="Juega ajedrez en tu navegador contra un amigo o la computadora.">
+  <meta name="theme-color" content="#3b5b8c">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="apple-touch-icon" href="assets/logo.png">
+  <link rel="stylesheet" href="th-kit/ui.css">
+  <link rel="stylesheet" href="th-kit/fonts/space-grotesk.css">
+  <link rel="stylesheet" href="th-kit/fonts/inter.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-wrap">
+    <header class="app-header">
+      <div class="header-left">
+        <img src="assets/logo.png" alt="Logo" class="app-logo" onerror="this.style.display='none'; document.getElementById('text-logo').style.display='flex'">
+        <div id="text-logo" class="logo-fallback" style="display:none">♟️</div>
+        <div>
+          <h1 class="app-title">Tablero de Ajedrez</h1>
+          <p class="app-subtitle" id="status-text">Turno de las Blancas</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-sound" class="th-btn th-btn-ghost th-btn-icon" aria-label="Sonido" title="Alternar sonido">
+          <i data-icon="volume-2" id="sound-icon"></i>
+        </button>
+        <button id="btn-share" class="th-btn th-btn-ghost th-btn-icon" aria-label="Compartir" title="Compartir partida">
+          <i data-icon="share-2"></i>
+        </button>
+        <button id="btn-new" class="th-btn th-btn-primary th-btn-sm" title="Nueva partida">
+          <i data-icon="rotate-ccw"></i>
+          <span>Nueva</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <!-- Seccion del Tablero -->
+      <section class="board-column">
+        <!-- Barra de jugador superior -->
+        <div class="player-bar top-player" id="player-top">
+          <div class="player-info">
+            <span class="player-tag" id="top-role-icon">♚</span>
+            <div class="player-name-wrap">
+              <span class="player-name" id="top-player-name">Negras</span>
+              <span class="player-score-lead" id="top-material-diff"></span>
+            </div>
+          </div>
+          <div class="captured-box" id="top-captured"></div>
+          <span class="clock" id="top-clock" hidden>00:00</span>
+        </div>
+
+        <div class="th-card mode-card">
+          <h2 class="card-title">Reloj</h2>
+          <div class="diff-tabs" role="group" aria-label="Tiempo por jugador">
+            <button class="clock-tab is-on" data-clock="0">Sin reloj</button>
+            <button class="clock-tab" data-clock="3">3 min</button>
+            <button class="clock-tab" data-clock="5">5 min</button>
+            <button class="clock-tab" data-clock="10">10 min</button>
+            <button class="clock-tab" data-clock="15">15 min</button>
+          </div>
+          <h2 class="card-title">Color del tablero</h2>
+          <div class="theme-row">
+            <button class="theme-swatch is-active" data-board="classic" aria-label="Clásico" title="Clásico"></button>
+            <button class="theme-swatch" data-board="blue" aria-label="Azul" title="Azul"></button>
+            <button class="theme-swatch" data-board="wood" aria-label="Madera" title="Madera"></button>
+            <button class="theme-swatch" data-board="rose" aria-label="Rosa" title="Rosa"></button>
+            <button class="theme-swatch" data-board="gray" aria-label="Gris" title="Gris"></button>
+          </div>
+        </div>
+
+        <!-- Contenedor del Tablero -->
+        <div class="board-wrapper">
+          <div id="chessboard" class="chessboard" aria-label="Tablero de ajedrez"></div>
+        </div>
+
+        <!-- Barra de jugador inferior (más abajo) -->
+        <div class="player-bar bottom-player" id="player-bottom">
+          <div class="player-info">
+            <span class="player-tag" id="bottom-role-icon">♔</span>
+            <div class="player-name-wrap">
+              <span class="player-name" id="bottom-player-name">Blancas</span>
+              <span class="player-score-lead" id="bottom-material-diff"></span>
+            </div>
+          </div>
+          <div class="captured-box" id="bottom-captured"></div>
+          <span class="clock" id="bottom-clock" hidden>00:00</span>
+        </div>
+
+        <!-- Barra rapida de acciones -->
+        <div class="quick-controls">
+          <button id="btn-undo" class="th-btn th-btn-soft th-btn-sm" title="Deshacer jugada">
+            <i data-icon="undo-2"></i>
+            <span>Deshacer</span>
+          </button>
+          <button id="btn-flip" class="th-btn th-btn-soft th-btn-sm" title="Girar tablero">
+            <i data-icon="refresh-cw"></i>
+            <span>Girar</span>
+          </button>
+          <button id="btn-mode-quick" class="th-btn th-btn-soft th-btn-sm" title="Configuración de juego">
+            <i data-icon="settings"></i>
+            <span id="mode-badge-label">Contra IA</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Panel Lateral / Panel de Control -->
+      <aside class="sidebar-column">
+        <!-- Selector de Modo -->
+        <div class="th-card mode-card">
+          <div class="card-header-row">
+            <h2 class="card-title">Modo de juego</h2>
+            <span class="th-badge" id="turn-indicator-badge">Blancas</span>
+          </div>
+
+          <div class="mode-select-grid">
+            <button class="mode-option is-active" data-mode="ai">
+              <i data-icon="bot"></i>
+              <span>Contra IA</span>
+            </button>
+            <button class="mode-option" data-mode="pvp">
+              <i data-icon="users"></i>
+              <span>2 Jugadores</span>
+            </button>
+          </div>
+
+          <div id="ai-difficulty-wrap" class="difficulty-section">
+            <label class="th-label" for="ai-difficulty">Dificultad de la IA</label>
+            <div class="th-tabs diff-tabs" role="tablist">
+              <button class="diff-tab is-on" data-diff="easy">Fácil</button>
+              <button class="diff-tab" data-diff="medium">Medio</button>
+              <button class="diff-tab" data-diff="hard">Experto</button>
+            </div>
+            <div class="play-as-row">
+              <span class="sub-label">Jugar con:</span>
+              <div class="color-pick-buttons">
+                <button class="color-pick-btn is-active" data-side="w">♔ Blancas</button>
+                <button class="color-pick-btn" data-side="b">♚ Negras</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Historial de jugadas -->
+        <div class="th-card history-card">
+          <div class="card-header-row">
+            <h2 class="card-title">Movimientos</h2>
+            <span class="move-counter" id="move-count-text">0 jugadas</span>
+          </div>
+          <div class="moves-container" id="moves-log">
+            <div class="empty-history" id="empty-history-note">
+              <span>Empieza la partida moviendo una pieza blanca</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="app-credit">Creado por Klvrt</footer>
+
+    <!-- Dialogo de Promocion de Peon -->
+    <dialog id="promotion-modal" class="th-modal promotion-dialog">
+      <div class="promotion-content">
+        <h3>Coronar peón</h3>
+        <p>Elige la pieza para tu promoción:</p>
+        <div class="promotion-choices" id="promo-choices"></div>
+      </div>
+    </dialog>
+
+    <!-- Dialogo Fin de Partida -->
+    <dialog id="gameover-modal" class="th-modal gameover-dialog">
+      <div class="gameover-content">
+        <div class="gameover-icon" id="go-icon">🏆</div>
+        <h2 id="go-title">¡Fin de la partida!</h2>
+        <p id="go-description">Jaque mate. Ganan las Blancas.</p>
+        <div class="go-actions">
+          <button id="btn-rematch" class="th-btn th-btn-primary th-btn-block">Jugar de nuevo</button>
+          <button id="btn-close-modal" class="th-btn th-btn-ghost th-btn-block">Ver tablero</button>
+        </div>
+      </div>
+    </dialog>
+  </div>
+
+  <script src="th-kit/motion.js"></script>
+  <script src="th-kit/fx.js"></script>
+  <script src="chess.js"></script>
+</body>
+</html>

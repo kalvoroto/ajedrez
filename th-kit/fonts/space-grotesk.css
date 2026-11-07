@@ -1,0 +1,4 @@
+/* Space Grotesk: usamos la pila del sistema como respaldo para no depender de red. */
+:root {
+  --font-display-stack: "Space Grotesk", "Outfit", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
